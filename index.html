@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>烟花</title>
+    <style>
+        body{background-image: linear-gradient(to right,#021330,#243b6c,#021330);}
+        *{padding: 0;margin: 0;}
+        div{width: 800px;height: 600px;border: 5px blueviolet solid;background: skyblue;margin: 20px auto;position: relative;}
+        .bigFire{width: 10px;height: 10px;position: absolute;}
+        .smallFire{width: 5px;height: 5px;border-radius: 50%; position: absolute;}
+    </style>
+</head>
+<body>
+    <div></div>
+    <script>
+        class SetFire{
+            constructor(ele){
+                this.ele = ele;
+            }
+            
+            fun1(){
+                this.ele.addEventListener('click',(e)=>{
+                    let x = e.offsetX;
+                    let y = e.offsetY;
+                    if(x < 0){
+                        x = 0;
+                    }
+                    if(y < 0){
+                        y = 0;
+                    }
+                    if( x > this.ele.clientWidth){
+                        x = this.ele.clientWidth;
+                    }
+                    if( y > this.ele.clientHeight){
+                        y = this.ele.clientHeight;
+                    }
+                    let fire1 = document.createElement('p');
+                    let fire2 = document.createElement('p');
+                    fire1.className = 'bigFire';
+                    fire2.className = 'bigFire';
+
+                    fire1.style.left = x + 'px';
+                    fire1.style.top = y + 'px';
+
+                    fire2.style.left = x + 'px';
+                    fire2.style.bottom = 0 + 'px';
+
+                    fire1.style.background = this.color();
+                    fire2.style.background = this.color();
+
+                    this.ele.appendChild(fire1)
+                    this.ele.appendChild(fire2)
+
+                    this.move(fire2,{top:y},()=>{
+                        this.ele.removeChild(fire1)
+                        this.ele.removeChild(fire2)
+
+                        let num = parseInt(Math.random()*(50+1-20)+20);
+                        for(let i = 1; i <= num; i++){
+                            let smallF = document.createElement('p');
+                            smallF.className = 'smallFire';
+                            smallF.style.background = this.color();
+                            smallF.style.left = x + 'px';
+                            smallF.style.top = y + 'px';
+                            let randomX = parseInt(Math.random()*((x+150)+1-(x-150))+(x-150));
+                            let randomY = parseInt(Math.random()*((y+150)+1-(y-150))+(y-150));
+                            this.ele.appendChild(smallF);
+                            this.move(smallF,{left:randomX,top:randomY},()=>{
+                                this.ele.removeChild(smallF)
+                            })
+                        }
+                    })
+                })
+            }
+            color(){
+                let c1 = parseInt(Math.random()*256);
+                let c2 = parseInt(Math.random()*256);
+                let c3 = parseInt(Math.random()*256);
+                return `rgba(${c1},${c2},${c3})`
+            }
+            move(ele, obj, callback) {
+                let time = {};
+                for (let type in obj) {
+                    let oldVal = 0;
+                    if (type === 'opacity') {
+                        oldVal = parseFloat(window.getComputedStyle(ele)[type]) * 100;
+                    } else {
+                        oldVal = parseInt(window.getComputedStyle(ele)[type]);
+                    }
+                    time[type] = setInterval(() => {
+                        let val = (obj[type] - oldVal) / 10;
+                        val = val > 0 ? Math.ceil(val) : Math.floor(val);
+                        oldVal += val;
+                        if (type === 'opacity') {
+                            ele.style[type] = oldVal / 100;
+                        } else {
+                            ele.style[type] = oldVal + 'px';
+                        }
+                        if (oldVal == obj[type]) {
+                            clearInterval(time[type]);
+                            delete (time[type]);
+                        }
+
+                        if (Object.keys(time) == 0) {
+                            callback();
+                        }
+                    }, 10)
+
+                }
+            }
+            init(){
+                this.fun1()
+            }
+        }
+        let oDiv = document.querySelector('div')
+        const obj2 = new SetFire(oDiv);
+        obj2.init();
+    </script>
+</body>
+</html>
